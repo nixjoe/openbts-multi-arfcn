@@ -36,12 +36,6 @@
 #include <Logger.h>
 #include <Configuration.h>
 
-#ifdef RESAMPLE
-  #define DEVICERATE 400e3
-#else
-  #define DEVICERATE 1625e3/6 
-#endif
-
 using namespace std;
 
 ConfigurationTable gConfig("/etc/OpenBTS/OpenBTS.db");
@@ -88,14 +82,19 @@ int main(int argc, char *argv[])
 
   srandom(time(NULL));
 
-  int mOversamplingRate = numARFCN/2 + numARFCN;
-  RadioDevice *usrp = RadioDevice::make(DEVICERATE * SAMPSPERSYM);
+  double rxOffset = getRadioOffset();
+  if (rxOffset == 0.0f) {
+    LOG(ALERT) << "Rx sample offset not found, using offset of 0.0s";
+    LOG(ALERT) << "Rx burst timing may not be accurate"; 
+  }
+
+  RadioDevice *usrp = RadioDevice::make(DEVICE_RATE, rxOffset);
   if (!usrp->open(deviceArgs)) {
     LOG(ALERT) << "Transceiver exiting..." << std::endl;
     return EXIT_FAILURE;
   }
 
-  RadioInterface* radio = new RadioInterface(usrp,3,SAMPSPERSYM,mOversamplingRate,false);
+  RadioInterface* radio = new RadioInterface(usrp,3,SAMPSPERSYM,0,false);
   DriveLoop *drive = new DriveLoop(SAMPSPERSYM,GSM::Time(3,0),radio);
   Transceiver *trx = new Transceiver(gConfig.getNum("TRX.Port"),gConfig.getStr("TRX.IP").c_str(),SAMPSPERSYM,radio,drive, 0);
   trx->receiveFIFO(radio->receiveFIFO(0));
