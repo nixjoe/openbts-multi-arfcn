@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
   while(!gbShutdown) { sleep(1); }//i++; if (i==60) break;}
 
   cout << "Shutting down transceiver..." << endl;
+  trx->shutdown();
 
   delete trx;
   delete drive;
