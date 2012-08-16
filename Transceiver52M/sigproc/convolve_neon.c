@@ -36,7 +36,17 @@ void conv_real_neon8(float *restrict x,
 		     float *restrict y,
 		     int len);
 
+void conv_real_neon12(float *restrict x,
+		      float *restrict h,
+		      float *restrict y,
+		      int len);
+
 void conv_real_neon16(float *restrict x,
+		      float *restrict h,
+		      float *restrict y,
+		      int len);
+
+void conv_real_neon20(float *restrict x,
 		      float *restrict h,
 		      float *restrict y,
 		      int len);
@@ -95,8 +105,14 @@ int cxvec_convolve(struct cxvec *restrict in_vec,
 	case 8:
 		conv_func = conv_real_neon8;
 		break;
+	case 12:
+		conv_func = conv_real_neon12;
+		break;
 	case 16:
 		conv_func = conv_real_neon16;
+		break;
+	case 20:
+		conv_func = conv_real_neon20;
 		break;
 	default:
 		conv_func = NULL; 
@@ -146,8 +162,14 @@ int single_convolve(cmplx *restrict in,
 	case 8:
 		conv_func = conv_real_neon8;
 		break;
+	case 12:
+		conv_func = conv_real_neon12;
+		break;
 	case 16:
 		conv_func = conv_real_neon16;
+		break;
+	case 20:
+		conv_func = conv_real_neon20;
 		break;
 	default:
 		conv_func = NULL; 
