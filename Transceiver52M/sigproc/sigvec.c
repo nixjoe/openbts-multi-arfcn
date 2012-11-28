@@ -291,22 +291,16 @@ int cxvec_sub(struct cxvec *a, struct cxvec *b, struct cxvec *out)
  *  \param[in] a Input complex vector 'A'
  *  \param[in] b Input complex vector 'B'
  *  \param[out] out Output complex vector
- *
- * Vector 'B' is subtracted from vector 'A' and the results are written to
- * the output vector. All vectors must be of identical length. 
  */
 int cxvec_mul(struct cxvec *a, struct cxvec *b, struct cxvec *out)
 {
-	int i;
-
 	if ((a->len != b->len) || (b->len != out->len)) {
-		fprintf(stderr, "cxvec_sub: invalid input\n");
+		fprintf(stderr, "cxvec_mul: invalid input\n");
 		return -1;
 	}
 
-	for (i = 0; i < a->len; i++) {
-		mul_cx_gen(&a->data[i], &b->data[i], &out->data[i]);
-	}
+	for (int i = 0; i < a->len; i++)
+		out->data[i] = a->data[i] * b->data[i];
 
 	return a->len;
 }

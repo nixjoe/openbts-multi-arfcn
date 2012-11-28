@@ -32,7 +32,7 @@ libsigproc_la_SOURCES = \
 if USE_SSE3
 libsigproc_la_SOURCES += convolve_sse.c
 else
-libsigproc_la_SOURCES += convolve_neon.c conv_neon.S
+libsigproc_la_SOURCES += convolve_neon.c conv_neon.S sigvec_neon.c
 endif
 
 noinst_HEADERS = \
