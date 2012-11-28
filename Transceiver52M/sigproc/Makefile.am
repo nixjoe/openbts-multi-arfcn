@@ -37,6 +37,7 @@ else
 libsigproc_la_SOURCES += \
 	convolve_neon.c \
 	conv_neon.S \
+	convert_neon.S \
 	sigvec_neon.c \
 	mul4_neon.S \
 	mac4_neon.S
@@ -46,4 +47,5 @@ noinst_HEADERS = \
 	sigproc.h \
 	sigvec.h \
 	convolve.h \
+	convert.h \
 	fft.h
