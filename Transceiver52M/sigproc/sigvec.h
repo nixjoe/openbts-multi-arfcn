@@ -74,5 +74,7 @@ int cxvec_deinterlv_rv(struct cxvec *in, struct cxvec **out, int chan_m);
 
 /* Floating point utilities */
 float cxvec_sinc(float x);
+int cxvec_mac(float complex *a, float complex *b, float complex *out, int len);
+int cxvec_mac4(float complex *a, float complex *b, float complex *out, int len);
 
 #endif /* _SIGVEC_H_ */

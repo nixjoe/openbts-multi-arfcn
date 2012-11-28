@@ -30,9 +30,16 @@ libsigproc_la_SOURCES = \
 	fft.c
 
 if USE_SSE3
-libsigproc_la_SOURCES += convolve_sse.c
+libsigproc_la_SOURCES += \
+	convolve_sse.c \
+	sigvec_sse.c
 else
-libsigproc_la_SOURCES += convolve_neon.c conv_neon.S sigvec_neon.c
+libsigproc_la_SOURCES += \
+	convolve_neon.c \
+	conv_neon.S \
+	sigvec_neon.c \
+	mul4_neon.S \
+	mac4_neon.S
 endif
 
 noinst_HEADERS = \
