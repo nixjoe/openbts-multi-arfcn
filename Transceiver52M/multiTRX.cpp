@@ -99,12 +99,19 @@ int main(int argc, char *argv[])
 {
 	int i, chanM, numARFCN = 1;
 	int chanMap[CHAN_MAX];
+	std::string deviceArgs;
 	RadioDevice *usrp;
 	RadioInterface* radio;
 	DriveLoop *drive;
 	Transceiver *trx[CHAN_MAX];
 
-	gLogInit("transceiver", gConfig.getStr("Log.Level").c_str(), LOG_LOCAL7);
+	if (argc == 3)
+		deviceArgs = std::string(argv[2]);
+	else
+		deviceArgs = "";
+
+	gLogInit("transceiver",
+		 gConfig.getStr("Log.Level").c_str(),LOG_LOCAL7);
 
 	if (argc > 1) {
 		numARFCN = atoi(argv[1]);
@@ -142,9 +149,11 @@ int main(int argc, char *argv[])
 		LOG(ALERT) << "Rx burst timing may not be accurate"; 
 	}
 
-	double deviceRate = chanM * CHAN_RATE * DEV_RESAMP_OUTRATE / DEV_RESAMP_INRATE;
-	usrp = RadioDevice::make(deviceRate, rxOffset, DEVICE_TX_AMPL / numARFCN);
-	if (!usrp->open()) {
+	double deviceRate = chanM * CHAN_RATE *
+			    DEV_RESAMP_OUTRATE / DEV_RESAMP_INRATE;
+	usrp = RadioDevice::make(deviceRate, rxOffset,
+				 DEVICE_TX_AMPL / numARFCN);
+	if (!usrp->open(deviceArgs)) {
 		LOG(ALERT) << "Failed to open device, exiting...";
 		return EXIT_FAILURE;
 	}
