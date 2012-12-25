@@ -95,6 +95,24 @@ static void createTrx(Transceiver **trx, int *map, int num,
 	}
 }
 
+void setAntennas(RadioDevice *usrp)
+{
+   std::string txAntenna, rxAntenna;
+
+  if (gConfig.defines("GSM.Radio.TxAntenna"))
+    txAntenna = gConfig.getStr("GSM.Radio.TxAntenna").c_str();
+  if (gConfig.defines("GSM.Radio.RxAntenna"))
+    rxAntenna = gConfig.getStr("GSM.Radio.RxAntenna").c_str();
+
+  if (txAntenna != "")  
+    usrp->setTxAntenna(txAntenna);
+  if (rxAntenna != "")  
+    usrp->setRxAntenna(rxAntenna);
+
+  LOG(INFO) << "transceiver using transmit antenna " << usrp->getRxAntenna();
+  LOG(INFO) << "transceiver using receive antenna " << usrp->getTxAntenna();
+}
+
 int main(int argc, char *argv[])
 {
 	int i, chanM, numARFCN = 1;
@@ -157,6 +175,7 @@ int main(int argc, char *argv[])
 		LOG(ALERT) << "Failed to open device, exiting...";
 		return EXIT_FAILURE;
 	}
+	setAntennas(usrp);
 
 	radio = new RadioInterface(usrp, chanM, 3, SAMPSPERSYM, 0, false);
 	drive = new DriveLoop(5700, "127.0.0.1", chanM, chanMap[0],
