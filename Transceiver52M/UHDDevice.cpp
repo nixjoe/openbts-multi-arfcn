@@ -810,10 +810,10 @@ bool uhd_device::recv_async_msg()
 	if (md.event_code != uhd::async_metadata_t::EVENT_CODE_BURST_ACK) {
 		aligned = false;
 
-		if ((md.event_code != uhd::async_metadata_t::EVENT_CODE_UNDERFLOW) &&
-		    (md.event_code != uhd::async_metadata_t::EVENT_CODE_TIME_ERROR)) {
+//		if ((md.event_code != uhd::async_metadata_t::EVENT_CODE_UNDERFLOW) &&
+//		    (md.event_code != uhd::async_metadata_t::EVENT_CODE_TIME_ERROR)) {
 			LOG(ERR) << str_code(md);
-		}
+//		}
 	}
 
 	return true;

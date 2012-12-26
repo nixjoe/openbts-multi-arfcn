@@ -1106,6 +1106,8 @@ bool analyzeTrafficBurst(signalVector &rxBurst,
       
   }
 
+//  *TOA = 0.0f;
+//  peakToMean = 10.0f;
   return (peakToMean > detectThreshold);
 		  
 }

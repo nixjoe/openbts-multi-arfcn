@@ -163,17 +163,20 @@ SoftVector *Transceiver::pullRadioVector(GSM::Time &wTime,
 
   DriveLoop::CorrType corrType = mDriveLoop->expectedCorrType(mChannel, rxBurst->getTime());
 
+#if 1
   if ((corrType == DriveLoop::OFF) || (corrType == DriveLoop::IDLE)) {
     delete rxBurst;
     return NULL;
   }
- 
+#endif
+
   // check to see if received burst has sufficient 
   signalVector *vectorBurst = rxBurst;
   fcomplex amplitude = 0.0;
   float TOA = 0.0;
   float avgPwr = 0.0;
 
+//  mEnergyThreshold = 0.0f;
   if (!energyDetect(*vectorBurst,20*mSamplesPerSymbol,mEnergyThreshold,&avgPwr)) {
      LOG(DEBUG) << "Estimated Energy: " << sqrt(avgPwr) << ", at time " << rxBurst->getTime();
      double framesElapsed = rxBurst->getTime()-prevFalseDetectionTime;

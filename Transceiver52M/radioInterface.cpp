@@ -53,7 +53,7 @@ RadioInterface::~RadioInterface(void)
     mRadio->stop();
     close();
  
-    delete mAlignRadioServiceLoopThread;
+//    delete mAlignRadioServiceLoopThread;
 
     for (i = 0; i < mChanM; i++) {
       if (rcvBuffer[i] != NULL)
@@ -144,9 +144,10 @@ bool RadioInterface::start()
   LOG(INFO) << "starting radio interface...";
   mOn = true;
 
-  mAlignRadioServiceLoopThread = new Thread(32768);
-  mAlignRadioServiceLoopThread->start((void * (*)(void*))AlignRadioServiceLoopAdapter,
-                                      (void*)this);
+//  mAlignRadioServiceLoopThread = new Thread(32768);
+//  mAlignRadioServiceLoopThread->start((void * (*)(void*))AlignRadioServiceLoopAdapter,
+//                                      (void*)this);
+
   for (i = 0; i < mChanM; i++) {
     sendBuffer[i] = new float[8*2*INCHUNK];
     rcvBuffer[i] = new float[8*2*OUTCHUNK];

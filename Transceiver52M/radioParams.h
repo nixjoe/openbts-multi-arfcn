@@ -28,7 +28,7 @@
  *
  * ENABLE_ALL_CHANS - set to transmit dummy bursts on all active channels
  */
-//#define ENABLE_ALL_CHANS
+#define ENABLE_ALL_CHANS
 
 /* Device settings */
 #define DEVICE_TX_AMPL		0.5
