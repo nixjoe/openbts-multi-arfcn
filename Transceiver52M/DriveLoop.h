@@ -57,6 +57,7 @@ private:
   VectorQueue  mTransmitPriorityQueue[CHAN_MAX];   ///< priority queue of transmit bursts received from GSM core
 
   Thread *mRadioDriveLoopThread;  ///< thread to push/pull bursts into transmit/receive FIFO
+  Thread *mRadioTxDriveLoopThread;  ///< thread to push/pull bursts into transmit/receive FIFO
 
   GSM::Time mTransmitDeadlineClock;       ///< deadline for pushing bursts into transmit FIFO 
   GSM::Time mStartTime;                   ///< random start time of the radio clock
@@ -178,6 +179,7 @@ protected:
   bool driveTransmitPriorityQueue();
 
   friend void *RadioDriveLoopAdapter(DriveLoop *);
+  friend void *RadioTxDriveLoopAdapter(DriveLoop *);
 
   void reset();
 
@@ -186,10 +188,10 @@ protected:
 
   /** set priority on current thread */
   void setPriority() { mRadioInterface->setPriority(); }
-
 };
 
 /** FIFO thread loop */
 void *RadioDriveLoopAdapter(DriveLoop *);
+void *RadioTxDriveLoopAdapter(DriveLoop *);
 
 #endif /* _DRIVELOOP_H_ */

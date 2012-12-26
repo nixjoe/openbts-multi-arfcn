@@ -33,6 +33,7 @@ DriveLoop::DriveLoop(int wBasePort, const char *TRXAddress,
 {
   mChanM = wChanM;
   mRadioDriveLoopThread = NULL;
+  mRadioTxDriveLoopThread = NULL;
   mSamplesPerSymbol = wSamplesPerSymbol;
   mRadioInterface = wRadioInterface;
 
@@ -87,6 +88,9 @@ DriveLoop::~DriveLoop()
 
     if (mRadioDriveLoopThread)
       delete mRadioDriveLoopThread;
+
+    if (mRadioTxDriveLoopThread)
+      delete mRadioTxDriveLoopThread;
   }
 
   delete gsmPulse;
@@ -101,6 +105,8 @@ void DriveLoop::start()
   mOn = true;
   mRadioDriveLoopThread = new Thread(32768);
   mRadioDriveLoopThread->start((void * (*)(void*))RadioDriveLoopAdapter, (void*) this);
+  mRadioTxDriveLoopThread = new Thread(32768);
+  mRadioTxDriveLoopThread->start((void * (*)(void*))RadioTxDriveLoopAdapter, (void*) this);
 }
 
 void DriveLoop::pushRadioVector(GSM::Time &nowTime)
@@ -262,17 +268,13 @@ void DriveLoop::driveReceiveFIFO()
  */
 void DriveLoop::driveTransmitFIFO() 
 {
-  int i;
-
   RadioClock *radioClock = (mRadioInterface->getClock());
+  radioClock->wait();
+
   while (radioClock->get() + mTransmitLatency > mTransmitDeadlineClock) {
     pushRadioVector(mTransmitDeadlineClock);
     mTransmitDeadlineClock.incTN();
   }
-
-  // FIXME -- This should not be a hard spin.
-  // But any delay here causes us to throw omni_thread_fatal.
-  //else radioClock->wait();
 }
 
 void DriveLoop::writeClockInterface()
@@ -295,6 +297,17 @@ void *RadioDriveLoopAdapter(DriveLoop *drive)
 
   while (drive->on()) {
     drive->driveReceiveFIFO();
+    pthread_testcancel();
+  }
+
+  return NULL;
+}
+
+void *RadioTxDriveLoopAdapter(DriveLoop *drive)
+{
+  drive->setPriority();
+
+  while (drive->on()) {
     drive->driveTransmitFIFO();
     pthread_testcancel();
   }
