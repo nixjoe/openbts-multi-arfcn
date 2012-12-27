@@ -293,7 +293,7 @@ void DriveLoop::writeClockInterface()
 
 void *RadioDriveLoopAdapter(DriveLoop *drive)
 {
-  drive->setPriority();
+  drive->setPriority(0.50);
 
   while (drive->on()) {
     drive->driveReceiveFIFO();
@@ -305,7 +305,7 @@ void *RadioDriveLoopAdapter(DriveLoop *drive)
 
 void *RadioTxDriveLoopAdapter(DriveLoop *drive)
 {
-  drive->setPriority();
+  drive->setPriority(0.50);
 
   while (drive->on()) {
     drive->driveTransmitFIFO();

@@ -149,7 +149,7 @@ public:
   double fullScaleOutputValue();
 
   /** set thread priority on current thread */
-  void setPriority() { mRadio->setPriority(); }
+  void setPriority(float prio) { mRadio->setPriority(prio); }
 
   /** get transport bus type of attached device */ 
   enum RadioDevice::busType getBus() { return mRadio->getBus(); }

@@ -50,7 +50,7 @@ class RadioDevice {
   virtual enum busType getBus()=0;
 
   /** Enable thread priority */
-  virtual void setPriority()=0;
+  virtual void setPriority(float prio)=0;
 
   /**
 	Read samples from the radio.

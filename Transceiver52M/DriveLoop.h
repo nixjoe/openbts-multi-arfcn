@@ -187,7 +187,7 @@ protected:
   bool on() { return mOn; }
 
   /** set priority on current thread */
-  void setPriority() { mRadioInterface->setPriority(); }
+  void setPriority(float prio) { mRadioInterface->setPriority(prio); }
 };
 
 /** FIFO thread loop */
