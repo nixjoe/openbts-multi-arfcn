@@ -41,7 +41,7 @@
 
     smpl_buf_sz       - The receive sample buffer size in bytes.
 */
-const double master_clk_rt = 13e6;
+const double master_clk_rt = 52e6;
 const size_t smpl_buf_sz = (1 << 20);
 
 static TIMESTAMP init_rd_ts = 0;
@@ -143,7 +143,7 @@ public:
 	bool start();
 	bool stop();
 	void restart(uhd::time_spec_t ts);
-	void setPriority();
+	void setPriority(float prio);
 	enum busType getBus() { return bus; }
 
 	int readSamples(float *buf, int len, bool *overrun, 
@@ -236,6 +236,8 @@ private:
 
 void *async_event_loop(uhd_device *dev)
 {
+	dev->setPriority(0.60);
+
 	while (dev->running()) {
 		dev->recv_async_msg();
 		pthread_testcancel();
@@ -325,7 +327,7 @@ double uhd_device::set_rates(double rate)
 {
 	double actual_rt, actual_clk_rt;
 
-#if !defined(MULTICHAN) & !defined(RESAMPLE)
+//#if !defined(MULTICHAN) & !defined(RESAMPLE)
 	// Make sure we can set the master clock rate on this device
 	actual_clk_rt = usrp_dev->get_master_clock_rate();
 	if (actual_clk_rt > U1_DEFAULT_CLK_RT) {
@@ -343,7 +345,7 @@ double uhd_device::set_rates(double rate)
 		LOG(ALERT) << "Actual clock rate " << actual_clk_rt;
 		return -1.0;
 	}
-#endif
+//#endif
 
 	// Set sample rates
 	usrp_dev->set_tx_rate(rate);
@@ -569,7 +571,7 @@ bool uhd_device::start()
 	}
 
 	started = true;
-	setPriority();
+//	setPriority();
 
 	// Start asynchronous event (underrun check) loop
 	async_event_thrd = new Thread(32768);
@@ -602,9 +604,9 @@ bool uhd_device::stop()
 	return true;
 }
 
-void uhd_device::setPriority()
+void uhd_device::setPriority(float prio)
 {
-	uhd::set_thread_priority_safe();
+	uhd::set_thread_priority_safe(prio);
 	return;
 }
 
