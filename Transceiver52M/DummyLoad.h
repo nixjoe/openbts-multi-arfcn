@@ -60,7 +60,10 @@ private:
  public:
 
   /** Object constructor */
-  DummyLoad (double _desiredSampleRate);
+  DummyLoad(double _desiredSampleRate,
+	    double offset = 1.0,
+	    double ampl = 1.0,
+	    bool skip_rx = 0);
 
   int loadBurst(short *wDummyBurst, int len);
 
@@ -83,7 +86,7 @@ private:
 	@param RSSI The received signal strength of the read result
 	@return The number of samples actually read
   */
-  int  readSamples(short *buf, int len, bool *overrun, 
+  int  readSamples(float *buf, int len, bool *overrun, 
 		   TIMESTAMP timestamp = 0xffffffff,
 		   bool *underrun = NULL,
 		   unsigned *RSSI = NULL);
@@ -96,7 +99,7 @@ private:
         @param isControl Set if data is a control packet, e.g. a ping command
         @return The number of samples actually written
   */
-  int  writeSamples(short *buf, int len, bool *underrun, 
+  int  writeSamples(float *buf, int len, bool *underrun, 
 		    TIMESTAMP timestamp = 0xffffffff,
 		    bool isControl = false);
  
@@ -128,5 +131,22 @@ private:
   inline double numberRead() { return samplesRead; }
   inline double numberWritten() { return samplesWritten;}
 
+  double setRxGain(double db) { return 0.0f; }
+  double getRxGain(void) { return 0.0f; }
+  double maxRxGain(void) { return 0.0f; }
+  double minRxGain(void) { return 0.0f; }
+  
+  double setTxGain(double db) { return 0.0f; }
+  double maxTxGain(void) { return 0.0f; }
+  double minTxGain(void) { return 0.0f; }
+  void setTxAntenna(std::string &name) { }
+  void setRxAntenna(std::string &name) { }
+  std::string getRxAntenna() { return ""; }
+  std::string getTxAntenna() { return ""; }
+
+  bool open(const std::string &args) { return true; }
+  void setPriority(float prio) { }
+
+  enum busType getBus() { return NET; }
 };
 

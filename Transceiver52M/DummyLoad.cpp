@@ -37,22 +37,28 @@
 #include "DummyLoad.h"
 
 #include <Logger.h>
-
+#include <stdlib.h>
 
 using namespace std;
-
-
 
 int DummyLoad::loadBurst(short *wDummyBurst, int len) {
   dummyBurst = wDummyBurst;
   dummyBurstSz = len;
+
+  for (int i = 0; i < 156; i++)
+    dummyBurst[i] = (float) (rand() % RAND_MAX);
 }
 
 
-DummyLoad::DummyLoad (double _desiredSampleRate) 
+DummyLoad::DummyLoad(double _desiredSampleRate,
+		     double offset,
+		     double ampl,
+		     bool skip_rx) 
 {
   LOG(INFO) << "creating USRP device...";
   sampleRate = _desiredSampleRate;
+
+  dummyBurst = (short *) malloc(156 * sizeof(float) * 2);
 }
 
 void DummyLoad::updateTime(void) {
@@ -86,7 +92,7 @@ bool DummyLoad::stop()
 
 
 // NOTE: Assumes sequential reads
-int DummyLoad::readSamples(short *buf, int len, bool *overrun, 
+int DummyLoad::readSamples(float *buf, int len, bool *overrun, 
 			    TIMESTAMP timestamp,
 			    bool *wUnderrun,
 			    unsigned *RSSI) 
@@ -95,19 +101,22 @@ int DummyLoad::readSamples(short *buf, int len, bool *overrun,
   underrunLock.lock();
   *wUnderrun = underrun;
   underrunLock.unlock();
+
+  loadBurst(dummyBurst, 156);
+
   if (currstamp+len < timestamp) {
 	usleep(100); 
-	return 0;
+	return len;
   } 
   else if (currstamp < timestamp) {
 	usleep(100);
-	return 0;
+	return len;
   }
   else if (timestamp+len < currstamp) {
 	memcpy(buf,dummyBurst+dummyBurstCursor*2,sizeof(short)*2*(dummyBurstSz-dummyBurstCursor));
 	int retVal = dummyBurstSz-dummyBurstCursor;
 	dummyBurstCursor = 0;
-	return retVal;
+	return len;
   }
   else if (timestamp + len > currstamp) {
 	int amount = timestamp + len - currstamp;
@@ -120,13 +129,13 @@ int DummyLoad::readSamples(short *buf, int len, bool *overrun,
         	memcpy(buf,dummyBurst+dummyBurstCursor*2,sizeof(short)*2*(dummyBurstSz-dummyBurstCursor));
         	int retVal = dummyBurstSz-dummyBurstCursor;
         	dummyBurstCursor = 0;
-        	return retVal;
+        	return len;
         }
   }
-  return 0;
+  return len;
 }
 
-int DummyLoad::writeSamples(short *buf, int len, bool *wUnderrun, 
+int DummyLoad::writeSamples(float *buf, int len, bool *wUnderrun, 
 			     unsigned long long timestamp,
 			     bool isControl) 
 {
@@ -144,3 +153,9 @@ bool DummyLoad::updateAlignment(TIMESTAMP timestamp)
 
 bool DummyLoad::setTxFreq(double wFreq) { return true;};
 bool DummyLoad::setRxFreq(double wFreq) { return true;};
+
+RadioDevice *RadioDevice::make(double smpl_rt, double offset,
+			       double ampl, bool skip_rx)
+{
+	return new DummyLoad(smpl_rt, offset, ampl, skip_rx);
+}
