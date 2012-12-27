@@ -19,6 +19,7 @@
 #include "Complex.h"
 #include "GSMTransfer.h"
 
+//#define LOADTEST
 
 using namespace GSM;
 

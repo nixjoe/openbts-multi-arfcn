@@ -942,6 +942,10 @@ bool detectRACHBurst(signalVector &rxBurst,
 
   float valleyPower = 0.0; 
 
+#ifdef LOADTEST
+  *TOA = 2.0f;
+#endif
+
   // check for bogus results
   if ((*TOA < 0.0) || (*TOA > correlatedRACH.size())) {
         *amplitude = 0.0;
@@ -974,6 +978,9 @@ bool detectRACHBurst(signalVector &rxBurst,
 
   LOG(DEBUG) << "RACH thresh: " << peakToMean;
 
+#ifdef LOADTEST
+  peakToMean = 10.0f;
+#endif
   return (peakToMean > detectThreshold);
 }
 
@@ -1038,7 +1045,9 @@ bool analyzeTrafficBurst(signalVector &rxBurst,
   *amplitude = peakDetect(correlatedBurst,TOA,&meanPower);
   float valleyPower = 0.0; //amplitude->norm2();
   fcomplex *peakPtr = correlatedBurst.begin() + (int) rint(*TOA);
-
+#ifdef LOADTEST
+  *TOA = 1.0;
+#endif
   // check for bogus results
   if ((*TOA < 0.0) || (*TOA > correlatedBurst.size())) {
         *amplitude = 0.0;
@@ -1105,9 +1114,9 @@ bool analyzeTrafficBurst(signalVector &rxBurst,
       *channelResponseOffset = 5*samplesPerSymbol-maxI;
       
   }
-
-//  *TOA = 0.0f;
-//  peakToMean = 10.0f;
+#ifdef LOADTEST
+  peakToMean = 10.0f;
+#endif
   return (peakToMean > detectThreshold);
 		  
 }
