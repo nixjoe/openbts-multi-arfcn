@@ -477,7 +477,7 @@ bool uhd_device::open(const std::string &args)
 #endif
 
 	// Create TX and RX streamers
-	uhd::stream_args_t stream_args("sc16");
+	uhd::stream_args_t stream_args("fc32");
 	tx_stream = usrp_dev->get_tx_stream(stream_args);
 	rx_stream = usrp_dev->get_rx_stream(stream_args);
 
@@ -552,13 +552,13 @@ void uhd_device::restart(uhd::time_spec_t ts)
 	usrp_dev->issue_stream_cmd(cmd);
 
 	uhd::rx_metadata_t md;
-	uint32_t buff[rx_spp];
+	uint64_t buff[rx_spp];
 
 	for (int i = 0; i < 50; i++) {
 		usrp_dev->get_device()->recv(buff,
 					     rx_spp,
 					     md,
-					     uhd::io_type_t::COMPLEX_INT16,
+					     uhd::io_type_t::COMPLEX_FLOAT32,
 					     uhd::device::RECV_MODE_ONE_PACKET);
 	}
 
