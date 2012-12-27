@@ -168,9 +168,6 @@ protected:
 
   /** return the drive loop pointer */
   DriveLoop *getDriveLoop() { return mDriveLoop; }
-  
-  /** set priority on current thread */
-  void setPriority() { mRadioInterface->setPriority(); }
 };
 
 /** FIFO thread loop */
