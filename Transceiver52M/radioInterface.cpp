@@ -38,6 +38,7 @@ RadioInterface::RadioInterface(RadioDevice *wRadio,
 {
   int i;
 
+  mSuperClock.set(wStartTime);
   mClock.set(wStartTime);
 
   for (i = 0; i < mChanM; i++) {
@@ -274,6 +275,8 @@ void RadioInterface::driveReceiveRadio()
     tN = rcvClock.TN();
     samplesPerBurst = (symbolsPerSlot + (tN % 4 == 0)) * samplesPerSymbol;
   }
+
+//  std::cout << "readSz: " << readSz << std::endl;
 
   if (readSz > 0) {
     rcvCursor -= readSz;

@@ -145,7 +145,8 @@ public:
 	enum busType getBus() { return bus; }
 
 	int readSamples(float *buf, int len, bool *overrun, 
-			TIMESTAMP timestamp, bool *underrun, unsigned *RSSI);
+			TIMESTAMP timestamp, bool *underrun, unsigned *RSSI,
+			int *blk_cnt, Mutex *lock);
 
 	int writeSamples(float *buf, int len, bool *underrun, 
 			 TIMESTAMP timestamp, bool isControl);
@@ -656,7 +657,8 @@ int uhd_device::check_rx_md_err(uhd::rx_metadata_t &md, ssize_t num_smpls)
 }
 
 int uhd_device::readSamples(float *buf, int len, bool *overrun,
-			TIMESTAMP timestamp, bool *underrun, unsigned *RSSI)
+			TIMESTAMP timestamp, bool *underrun, unsigned *RSSI,
+			int *blk_cnt, Mutex *lock)
 {
 	ssize_t rc;
 	uhd::time_spec_t ts;
@@ -721,7 +723,11 @@ int uhd_device::readSamples(float *buf, int len, bool *overrun,
 	}
 
 	// We have enough samples
-	rc = rx_smpl_buf->read(buf, len, timestamp);
+	lock->lock();
+	rc = rx_smpl_buf->read(buf + *blk_cnt * len, len, timestamp);
+	*blk_cnt = (*blk_cnt + 1) % 256;
+	lock->unlock();
+
 	if ((rc < 0) || (rc != len)) {
 		LOG(ERR) << rx_smpl_buf->str_code(rc);
 		LOG(ERR) << rx_smpl_buf->str_status();
@@ -785,6 +791,8 @@ bool uhd_device::updateAlignment(TIMESTAMP timestamp)
 
 bool uhd_device::setTxFreq(double wFreq)
 {
+//	wFreq = 400e6;
+
 	uhd::tune_result_t tr = usrp_dev->set_tx_freq(wFreq);
 	LOG(INFO) << "\n" << tr.to_pp_string();
 	tx_freq = usrp_dev->get_tx_freq();

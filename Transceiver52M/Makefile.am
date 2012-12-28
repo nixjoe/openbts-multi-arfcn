@@ -58,8 +58,8 @@ COMMON_SOURCES = \
 	radioParams.cpp \
 	sigProcLib.cpp \
 	Transceiver.cpp \
-	DriveLoop.cpp \
-	DummyLoad.cpp
+	DriveLoop.cpp
+#	DummyLoad.cpp
 
 if MULTICHAN 
 libtransceiver_la_SOURCES = \

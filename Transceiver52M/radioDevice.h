@@ -16,6 +16,7 @@
 #define __RADIO_DEVICE_H__
 
 #include <string>
+#include <Threads.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -65,7 +66,8 @@ class RadioDevice {
   virtual int readSamples(float *buf, int len, bool *overrun, 
 		   TIMESTAMP timestamp = 0xffffffff,
 		   bool *underrun = 0,
-		   unsigned *RSSI = 0)=0;
+		   unsigned *RSSI = 0,
+		   int *blk_cnt = NULL, Mutex *lock = NULL)=0;
   /**
         Write samples to the radio.
         @param buf Contains the data to be written.

@@ -77,7 +77,8 @@ bool RadioInterface::init()
 	}
 
 	OuterTxBuf = cxvec_alloc(RESAMP_OUTCHUNK * mChanM, 0, NULL, 0);
-	OuterRxBuf = cxvec_alloc(RESAMP_OUTCHUNK * mChanM + DEV_RESAMP_FILT_LEN,
+	OuterRxBuf = cxvec_alloc(256 * RESAMP_OUTCHUNK * mChanM +
+				 DEV_RESAMP_FILT_LEN,
 				 DEV_RESAMP_FILT_LEN, NULL, 0);
 	MiddleTxBuf = cxvec_alloc(RESAMP_INCHUNK * mChanM + DEV_RESAMP_FILT_LEN,
 				  DEV_RESAMP_FILT_LEN, NULL, 0);
@@ -124,34 +125,73 @@ void RadioInterface::close()
 	delete synth;
 }
 
-/* Receive a timestamped chunk from the device */
-void RadioInterface::pullBuffer()
-{
-	int i, numConverted, numRead;
-	bool localUnderrun;
+TIMESTAMP cnt = 0;
+int wr_blk_cnt = 0;
+TIMESTAMP rd_blk_cnt = 0;
 
+void RadioInterface::primaryDrive()
+{
+	int numRead;
+	int samplesPerBurst;
+	int tN = mSuperClock.get().TN();
+	bool localUnderrun;
+	unsigned RSSI;
+
+	samplesPerBurst = 936 + 6 * (tN % 4 == 0);
+
+	if (wr_blk_cnt >= 256)
+		std::cout << "Explode" << std::endl;
 	/* Read samples. Fail if we don't get what we want. */
 	numRead = mRadio->readSamples((float *) OuterRxBuf->data,
 				      RESAMP_OUTCHUNK * mChanM, &overrun,
-				      readTimestamp, &localUnderrun);
+				      readTimestamp, &localUnderrun,
+				      &RSSI, &wr_blk_cnt, &mSuperLock);
 
 	LOG(DEBUG) << "Rx read " << numRead << " samples from device";
 	assert(numRead == (RESAMP_OUTCHUNK * mChanM));
 
-	OuterRxBuf->len = numRead;
+//	OuterRxBuf->len += numRead;
 	underrun |= localUnderrun;
-	readTimestamp += (TIMESTAMP) OuterRxBuf->len;
+	readTimestamp += (TIMESTAMP) numRead;
 
-	for (i = 0; i < mChanM; i++) {
-		InnerRxBufs[i]->start_idx = rcvCursor;
-		InnerRxBufs[i]->data = &InnerRxBufs[i]->buf[rcvCursor];
-		InnerRxBufs[i]->len = CHAN_INCHUNK;
+//	std::cout << "wr_blk_cnt: " << wr_blk_cnt << " rd_blk_cnt: " << rd_blk_cnt << std::endl;
+	if (wr_blk_cnt == rd_blk_cnt)
+		std::cout << "Problem" << std::endl;
+	cnt += numRead;
+	while (cnt > samplesPerBurst) {
+		mSuperClock.incTN();
+		cnt -= samplesPerBurst;
+		samplesPerBurst = 936 + 6 * (tN % 4 == 0);
 	}
+}
 
-	/* Channelize */
-	numConverted = dnsampler->rotate(&OuterRxBuf, &MiddleRxBuf);
-	numConverted = chan->rotate(MiddleRxBuf, InnerRxBufs);
-	rcvCursor += numConverted;
+/* Receive a timestamped chunk from the device */
+void RadioInterface::pullBuffer()
+{
+	int numConverted;
+	struct cxvec *vec;
+
+	while (rd_blk_cnt != wr_blk_cnt) {
+		for (int i = 0; i < mChanM; i++) {
+			InnerRxBufs[i]->start_idx = rcvCursor;
+			InnerRxBufs[i]->data = &InnerRxBufs[i]->buf[rcvCursor];
+			InnerRxBufs[i]->len = CHAN_INCHUNK;
+		}
+
+		/* Channelize */
+		mSuperLock.lock();
+//		std::cout << "rd_blk_cnt: " << rd_blk_cnt << std::endl;
+		vec = cxvec_subvec(OuterRxBuf,
+				   rd_blk_cnt * RESAMP_OUTCHUNK * mChanM,
+				   DEV_RESAMP_FILT_LEN, RESAMP_OUTCHUNK * mChanM);
+		numConverted = dnsampler->rotate(&vec, &MiddleRxBuf);
+		mSuperLock.unlock();
+		numConverted = chan->rotate(MiddleRxBuf, InnerRxBufs);
+		rcvCursor += numConverted;
+		cxvec_free(vec);
+
+		rd_blk_cnt = (rd_blk_cnt + 1) % 256;
+	}
 }
 
 /* Resize data buffers of length 'len' after reading 'n' samples */
@@ -184,7 +224,7 @@ void RadioInterface::pushBuffer()
 	OuterTxBuf->len = numChunks * RESAMP_OUTCHUNK * mChanM;
 	numConverted = synth->rotate(InnerTxBufs, MiddleTxBuf);
 	numConverted = upsampler->rotate(&MiddleTxBuf, &OuterTxBuf);
-
+std::cout << "Pushing" << std::endl;
 	/* Write samples. Fail if we don't get what we want. */
 	numSent = mRadio->writeSamples((float *) OuterTxBuf->data,
 					numConverted,

@@ -51,6 +51,7 @@ private:
   TIMESTAMP writeTimestamp;		      ///< sample timestamp of next packet written to USRP
   TIMESTAMP readTimestamp;		      ///< sample timestamp of next packet read from USRP
 
+  RadioClock mSuperClock;                     ///< the basestation clock!
   RadioClock mClock;                          ///< the basestation clock!
 
   int samplesPerSymbol;			      ///< samples per GSM symbol
@@ -81,13 +82,15 @@ private:
   /** push GSM bursts into the transmit buffer */
   void pushBuffer(void);
 
-  /** pull GSM bursts from the receive buffer */
-  void pullBuffer(void);
-
   /** load receive vectors into FIFO's */
   void loadVectors(unsigned tN, int samplesPerBurst, int index, GSM::Time rxClock);
 
+  /** pull GSM bursts from the receive buffer */
+  void pullBuffer(void);
+
 public:
+  void primaryDrive();
+  Mutex mSuperLock;
 
   /** start the interface */
   bool start();
@@ -120,7 +123,7 @@ public:
   VectorFIFO* receiveFIFO(int num) { return &mReceiveFIFO[num];}
 
   /** return the basestation clock */
-  RadioClock* getClock(void) { return &mClock;};
+  RadioClock* getClock(void) { return &mSuperClock;};
 
   /** set transmit frequency */
   bool tuneTx(double freq);

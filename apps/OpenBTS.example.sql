@@ -56,7 +56,7 @@ INSERT INTO "CONFIG" VALUES('GSM.MaxSpeechLatency','2',0,0,'Maximum allowed spee
 INSERT INTO "CONFIG" VALUES('GSM.RACH.AC','1024',0,0,'Access class flags.  This is the raw parameter sent on the BCCH.  See GSM 04.08 10.5.2.29 for encoding.  Set to 0 to allow full access.  If you do not have proper PSAP integration, set to 0x0400 to indicate no support for emergency calls.');
 INSERT INTO "CONFIG" VALUES('GSM.RACH.MaxRetrans','1',0,0,'Maximum RACH retransmission attempts.  This is the raw parameter sent on the BCCH.  See GSM 04.08 10.5.2.29 for encoding.');
 INSERT INTO "CONFIG" VALUES('GSM.RACH.TxInteger','14',0,0,'Parameter to spread RACH busts over time.  This is the raw parameter sent on the BCCH.  See GSM 04.08 10.5.2.29 for encoding.');
-INSERT INTO "CONFIG" VALUES('GSM.Radio.ARFCNs','5',1,0,'The number of ARFCNs to use.  The ARFCN set will be C0, C0+2, C0+4, etc.  Static.');
+INSERT INTO "CONFIG" VALUES('GSM.Radio.ARFCNs','7',1,0,'The number of ARFCNs to use.  The ARFCN set will be C0, C0+2, C0+4, etc.  Static.');
 INSERT INTO "CONFIG" VALUES('GSM.Radio.UHDargs','addr=192.168.51.10',0,0,'Arguments to pass to UHD.');
 INSERT INTO "CONFIG" VALUES('GSM.Radio.TxAntenna','',0,0,'Transmit antenna string to pass to UHD.');
 INSERT INTO "CONFIG" VALUES('GSM.Radio.RxAntenna','',0,0,'Receive antenna string to pass to UHD.');
@@ -90,7 +90,7 @@ INSERT INTO "CONFIG" VALUES('GSM.Timer.T3122Max','255000',0,0,'Maximum allowed v
 INSERT INTO "CONFIG" VALUES('GSM.Timer.T3122Min','2000',0,0,'Minimum allowed value for T3122, the RACH holdoff timer, in milliseconds.');
 INSERT INTO "CONFIG" VALUES('GSM.Timer.T3212','30',0,0,'Registration timer T3212 period in minutes.  Should be a factor of 6.  Set to 0 to disable periodic registration.  Should be smaller than SIP registration period.');
 INSERT INTO "CONFIG" VALUES('Log.Alarms.Max','20',0,0,'Maximum number of alarms to remember inside the application.');
-INSERT INTO "CONFIG" VALUES('Log.Level','ERR',0,0,'Default logging level when no other level is defined for a file.');
+INSERT INTO "CONFIG" VALUES('Log.Level','INFO',0,0,'Default logging level when no other level is defined for a file.');
 INSERT INTO "CONFIG" VALUES('Log.Level.CallControl.cpp','INFO',0,1,'Default configuration logs a trace at L3.');
 INSERT INTO "CONFIG" VALUES('Log.Level.MobilityManagement.cpp','INFO',0,1,'Default configuration logs a trace at L3.');
 INSERT INTO "CONFIG" VALUES('Log.Level.RadioResource.cpp','INFO',0,1,'Default configuration logs a trace at L3.');

@@ -105,6 +105,8 @@ void DriveLoop::start()
   mOn = true;
   mRadioDriveLoopThread = new Thread(32768);
   mRadioDriveLoopThread->start((void * (*)(void*))RadioDriveLoopAdapter, (void*) this);
+  mRadioRxDriveLoopThread = new Thread(32768);
+  mRadioRxDriveLoopThread->start((void * (*)(void*))RadioRxDriveLoopAdapter, (void*) this);
   mRadioTxDriveLoopThread = new Thread(32768);
   mRadioTxDriveLoopThread->start((void * (*)(void*))RadioTxDriveLoopAdapter, (void*) this);
 }
@@ -254,6 +256,9 @@ void DriveLoop::driveReceiveFIFO()
   int TOA;  // in 1/256 of a symbol
   GSM::Time burstTime;
 
+  RadioClock *radioClock = (mRadioInterface->getClock());
+  radioClock->wait();
+
   mRadioInterface->driveReceiveRadio();
 }
 
@@ -277,6 +282,11 @@ void DriveLoop::driveTransmitFIFO()
   }
 }
 
+void DriveLoop::drivePrimary() 
+{
+  mRadioInterface->primaryDrive();
+}
+
 void DriveLoop::writeClockInterface()
 {
   char command[50];
@@ -293,7 +303,19 @@ void DriveLoop::writeClockInterface()
 
 void *RadioDriveLoopAdapter(DriveLoop *drive)
 {
-  drive->setPriority(0.50);
+  drive->setPriority(0.75);
+
+  while (drive->on()) {
+    drive->drivePrimary();
+    pthread_testcancel();
+  }
+
+  return NULL;
+}
+
+void *RadioRxDriveLoopAdapter(DriveLoop *drive)
+{
+  drive->setPriority(0.25);
 
   while (drive->on()) {
     drive->driveReceiveFIFO();
